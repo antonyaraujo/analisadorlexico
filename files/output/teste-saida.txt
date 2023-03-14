@@ -1,0 +1,26 @@
+01 NRO -393.32
+01 NRO 943
+01 NRO 0292
+02 NRO 43
+02 NRO 333
+02 NRO 43.22222
+02 NRO 13
+02 PRE if
+02 NRO 2
+04 CoM // also works 
+04 NRO 43
+04 IDE t4
+04 PRE return
+04 NRO 44
+04 IDE t55
+04 DEL .
+04 NRO 4
+04 IDE teste
+04 ART -
+04 NRO 4
+05 CoM /* alo tereza */
+06 IDE alo_ale
+06 IDE ala
+06 PRE start
+
+02 NMF -3.
