@@ -24,13 +24,19 @@
 07 DEL )
 08 PRE print
 08 DEL (
+08 IDE mensagem
+08 DEL )
+08 DEL ;
 09 PRE print
 09 DEL (
+09 IDE men
 09 IDE agem
-11 CoM // exemplo de teste do lexico 
+13 IDE linguagem
+13 IDE de
+13 IDE programacao
+15 DEL }
 
 04 TMF @
-05 CMF "teste 
-08 CMF "mensagem); 
-09 CMF "menÇ
-09 CMF "); 
+08 CMF "
+09 CMF "
+09 TMF Ç

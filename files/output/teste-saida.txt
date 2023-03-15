@@ -7,7 +7,6 @@
 02 NRO 13
 02 PRE if
 02 NRO 2
-04 CoM // also works 
 04 NRO 43
 04 IDE t4
 04 PRE return
