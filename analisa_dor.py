@@ -1,3 +1,9 @@
+'''
+EXA869 - MI Processadores de Linguagens de Programação
+Problema 1 - Analisador Léxico
+Discente: Antony Araujo
+'''
+
 import os
 
 # Analisador token
@@ -44,26 +50,23 @@ def adicionar_erro(erros, linha, sigla, lexema):
     erro = str(linha).zfill(2) + " " + sigla + " " + lexema
     erros.append(erro)
 
-def analisa_caracter(corrigida, inicial, tokens, erros, contagem_linha):
+def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
 # Percorre caracter a caracter da linha
     acumulador = inicial    
-    for caracter in corrigida:
+    for caracter in linha:
         # Adiciona o caracter ao acumulador
         acumulador += caracter
         # verifica se o caracter inicial do lexema é válido
         if(acumulador[0] in tabela_ascii or acumulador[0] != "\""):            
             # Classifica delimitadores de comentário            
-            if(acumulador[0] == "/"):
+            if(acumulador[0] == "/"):                             
                 if(len(acumulador) > 1):
-                    if(acumulador[1] == "*"): # É um comentário em bloco
-                        if(len(acumulador) > 3):
-                            # Verifica se o comentário em bloco foi fechado                            
-                            if(acumulador[len(acumulador)-1] == "/" and acumulador[len(acumulador)-2] == "*"):                                
-                                adicionar_token(tokens, contagem_linha, "CoM", acumulador)
-                                acumulador = ""
-                            else:
-                                next
-                        else:
+                    if(acumulador[1] == "*"): # É um comentário em bloco                        
+                        # Verifica se o comentário em bloco foi fechado                            
+                        if(acumulador[len(acumulador)-1] == "/" and acumulador[len(acumulador)-2] == "*"):                                
+                            adicionar_token(tokens, contagem_linha, "CoM", acumulador)
+                            acumulador = ""
+                        else:                            
                             next
                     else: # se for um comentário em linha
                         if(acumulador[1] == "/"):
@@ -206,7 +209,7 @@ def analisa_caracter(corrigida, inicial, tokens, erros, contagem_linha):
                                                         erros.append(erro)
                                                         acumulador = caracter
         else:                                 
-            # verifica se é uma cadeia de caracteres
+            # verifica se é uma cadeia de caracteres                   
             if(acumulador[0] == "\""):
                 if(len(acumulador) >= 1):
                     if(caracter not in tabela_ascii):
@@ -241,7 +244,7 @@ def analise(arquivo):
         if(len(acumulador) > 1):
             if(acumulador[0] == "/" and acumulador[1] == "/"):                
                 adicionar_token(tokens, contagem_linha, "CoM", acumulador)                                 
-                acumulador = ""
+                acumulador = ""        
         analisa_caracter(corrigida, acumulador, tokens, erros, contagem_linha)
 
     if(len(acumulador) != 0):
