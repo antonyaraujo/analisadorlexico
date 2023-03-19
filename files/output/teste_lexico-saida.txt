@@ -15,7 +15,9 @@
 07 DEL (
 07 IDE f
 07 REL >=
-07 NRO -10
+07 NRO -
+07 ART 1
+07 NRO 0
 07 DEL )
 07 LOG &&
 07 DEL (
@@ -36,6 +38,7 @@
 13 IDE programacao
 15 DEL }
 
+04 TMF 
 04 TMF @
 08 CMF "
 09 CMF "

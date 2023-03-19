@@ -56,8 +56,8 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
     for caracter in linha:
         # Adiciona o caracter ao acumulador
         acumulador += caracter
-        # verifica se o caracter inicial do lexema é válido
-        if(acumulador[0] in tabela_ascii or acumulador[0] != "\""):            
+        # verifica se o caracter inicial do lexema é válido        
+        if(acumulador[0] in tabela_ascii or acumulador[0] != "\""):                        
             # Classifica delimitadores de comentário            
             if(acumulador[0] == "/"):                             
                 if(len(acumulador) > 1):
@@ -75,7 +75,7 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                             # Classifica a barra como operador aritmético e parte para o próximo estado                                
                             adicionar_token(tokens, contagem_linha, "ART", acumulador[0])                            
                             acumulador = acumulador[1:]
-            else:                                                                                
+            else:                    
                 # Classifica delimitadores                    
                 if(acumulador[0] in delimitadores):
                     adicionar_token(tokens, contagem_linha, "DEL", acumulador[0])                        
@@ -88,36 +88,57 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                     else:
                         # Classifica numeros
                         if(acumulador[0] in digito or acumulador[0] == '-' or acumulador[0] in espaco):
+                            print("caractere", caracter)
+                            print("acumulador", acumulador)
+
                             # Verificar ponto no número                                                                
                             if(acumulador[0] == "-"): # É um número negativo
                                 if(len(acumulador) > 1):
-                                    if(acumulador[1] == "."):
-                                        adicionar_erro(erros, contagem_linha, "NMF", acumulador)
-                                        acumulador=""
-                                    else:
-                                        if(caracter == "."):
-                                            if(acumulador[:-1].find('.') != -1):
-                                                adicionar_erro(erros, contagem_linha, "NMF", acumulador[:-1])
-                                                acumulador=""
-                                        else:
+                                    if(caracter == "."):
+                                        print("chega aqui")
+                                        if(acumulador[:-1].find('.') != -1):
+                                            adicionar_erro(erros, contagem_linha, "NMF", acumulador[:-1])
+                                            acumulador=""
+                                    else:                                                                                                                                                         
                                             if(caracter == '-'):
-                                                if(acumulador[len(acumulador)-2] in digito):
-                                                    adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
-                                                    acumulador=caracter
-                                                else:                                                        
+                                                if(len(acumulador) == 2):                                                        
+                                                    if(acumulador[len(acumulador)-2] == "-"):                                                        
+                                                        adicionar_token(tokens, contagem_linha, "ART", acumulador)
+                                                        acumulador=""
+                                                else:                                                  
                                                     if(acumulador[len(acumulador)-2] == "-"):
                                                         adicionar_token(tokens, contagem_linha, "ART", acumulador)                                                            
-                                                        acumulador=""                                                        
+                                                        acumulador=caracter                                              
                                             else:
-                                                if(caracter not in digito):                                                        
-                                                    if(caracter == "-"):
-                                                        adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])                                                            
+                                                if(caracter not in digito):                                                                                                                                                                
+                                                    if(acumulador[len(acumulador)-2] in digito):                                                                
+                                                        adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
+                                                        acumulador = caracter
                                                     else:
-                                                        if(acumulador[len(acumulador)-2] in digito):                                                                
-                                                            adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
+                                                        if(acumulador[len(acumulador)-1] in digito and acumulador[len(acumulador)-2 == "-"]):
+                                                            adicionar_token(tokens, contagem_linha, "ART", acumulador[:-1])                                                                
+                                                            acumulador=acumulador[len(acumulador)-1]
                                                         else:
+                                                            print("segue um caso ##")
+                                                            print(acumulador)
                                                             adicionar_token(tokens, contagem_linha, "ART", acumulador[:-1])
-                                                    acumulador = caracter                                                    
+                                                            acumulador = caracter
+                                                else:
+                                                    if(len(acumulador) > 2):                                                                                                                                                   
+                                                        if(caracter != "-"):                                                                                                                                                                                    
+                                                            adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-2])
+                                                            adicionar_token(tokens, contagem_linha, "ART", acumulador[len(acumulador)-2])
+                                                            acumulador = acumulador[len(acumulador)-1]
+                                                        else:
+                                                            if(acumulador[len(acumulador)-2] in digito):
+                                                                adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
+                                                                acumulador = caracter
+                                                            else:
+                                                                if(acumulador[len(acumulador)-2] == "-"):                                                                                                                                        
+                                                                    adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-2])
+                                                                    adicionar_token(tokens, contagem_linha, "ART", "--")
+                                                                    acumulador = ""
+                                                    
                             else: # Número positivo
                                 if(acumulador[0] in digito):
                                     if(caracter not in digito or caracter not in espaco):                                            
@@ -131,12 +152,13 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                                             else:
                                                 next
                                         else:
-                                            if(caracter not in digito):
-                                                if(acumulador[len(acumulador)-2] in digito):
+                                            if(caracter not in digito):                                                
+                                                if(acumulador[len(acumulador)-2] in digito):                                                    
                                                     adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
                                                 else:
                                                     adicionar_erro(erros, contagem_linha, "NMF", acumulador[:-1])
-                                                acumulador = caracter                                                                               
+                                                acumulador = caracter
+                                                next                                                               
                                     else:
                                         if(caracter == "."):
                                             print("")
@@ -203,13 +225,13 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                                                                     acumulador = caracter
 
                                                 else:
-                                                    # Token mal formado
-                                                    if(caracter in digito or caracter in espaco or caracter in letra):
-                                                        erro = str(contagem_linha).zfill(2) + " TMF " + acumulador[:-1]
-                                                        erros.append(erro)
-                                                        acumulador = caracter
+                                                    # Token mal formado                                                    
+                                                    print("ERRO: ", acumulador)
+                                                    erro = str(contagem_linha).zfill(2) + " TMF " + acumulador[:-1]
+                                                    erros.append(erro)
+                                                    acumulador = caracter
         else:                                 
-            # verifica se é uma cadeia de caracteres                   
+            # verifica se é uma cadeia de caracteres               
             if(acumulador[0] == "\""):
                 if(len(acumulador) >= 1):
                     if(caracter not in tabela_ascii):
@@ -246,7 +268,7 @@ def analise(arquivo):
                 adicionar_token(tokens, contagem_linha, "CoM", acumulador)                                 
                 acumulador = ""        
         analisa_caracter(corrigida, acumulador, tokens, erros, contagem_linha)
-
+    
     if(len(acumulador) != 0):
         if(acumulador[0] == "\""):
             adicionar_erro(erros, contagem_linha, "CMF", acumulador)                      
