@@ -39,6 +39,13 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
     # Percorre caracter a caracter da linha
     acumulador = inicial
     for caracter in linha:
+        # print("CARACTER: " + caracter)
+        if (caracter == "\n"):
+            if (len(acumulador) > 1):
+                if (acumulador[0] == "/" and acumulador[1] == "*"):
+                    inicial = acumulador
+                    continue
+
         # Adiciona o caracter ao acumulador
         acumulador += caracter
         # verifica se o caracter inicial do lexema é válido
@@ -48,6 +55,8 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                 if (len(acumulador) > 1):
                     if (acumulador[1] == "*"):  # É um comentário em bloco
                         # Verifica se o comentário em bloco foi fechado
+                        if (caracter == "\n"):
+                            continue
                         if (acumulador[-1] == "/" and acumulador[-2] == "*"):
                             adicionar_token(
                                 tokens, contagem_linha, "CoM", acumulador)
@@ -57,10 +66,11 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                                 tokens, contagem_linha, "CoM", acumulador)
                             acumulador = ""
                         else:
-                            next
+                            continue
+                        continue
                     else:  # se for um comentário em linha
                         if (acumulador[1] == "/"):
-                            next
+                            continue
                         else:
                             # Classifica a barra como operador aritmético e parte para o próximo estado
                             adicionar_token(
@@ -68,6 +78,9 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                             acumulador = acumulador[1:]
             else:
                 # Classifica delimitadores
+                # print("chega aqui: " + acumulador)
+                if (acumulador[0] == "/" and acumulador[1] == "*"):
+                    continue
                 if (acumulador[0] in delimitadores):
                     adicionar_token(tokens, contagem_linha,
                                     "DEL", acumulador[0])
@@ -278,6 +291,7 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                             acumulador = ""
                         else:
                             if (caracter == "\n"):
+                                print("CHEGOU cá")
                                 print("ultimo: " + acumulador)
                                 acumulador = acumulador[:-1]
                                 print("ultimo: " + acumulador)
@@ -286,12 +300,13 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                                 erros.append(erro)
                                 acumulador = ""
                             else:
-                                next
+                                continue
 
             else:
                 # Se o caracter não é válido (de 32 a 126 a tabela ASCII, com excecao do 34 e acrescimo do caracter de tab (9))
+                print("FINAL CUM: " + acumulador)
                 if (len(acumulador) >= 4):
-                    if (acumulador[len(acumulador)-2] != "*" and acumulador[len(acumulador)-1] != "/"):
+                    if (acumulador[-2] != "*" and acumulador[-1] != "/"):
                         adicionar_erro(erros, contagem_linha,
                                        'CoMF', acumulador)
                     else:
@@ -322,9 +337,8 @@ def analise(arquivo):
             if (acumulador[0] == "/" and acumulador[1] == "/"):
                 adicionar_token(tokens, contagem_linha, "CoM", acumulador)
                 acumulador = ""
-
-        analisa_caracter(corrigida, acumulador, tokens, erros, contagem_linha)
-
+        analisa_caracter(
+            corrigida, acumulador, tokens, erros, contagem_linha)
     if (len(acumulador) != 0):
         if (acumulador[0] == "\""):
             adicionar_erro(erros, contagem_linha, "CMF", acumulador)
@@ -341,6 +355,7 @@ def analise(arquivo):
 def varredura_tokens(lista_tokens):
     lista = []
     for tk in lista_tokens:
-        lista.append(
-            {'token': tk[3:6], 'valor': tk[7:], 'linha': tk.split(" ")[0]})
+        if (tk[3:6] != "CoM"):
+            lista.append(
+                {'token': tk[3:6], 'valor': tk[7:], 'linha': tk.split(" ")[0]})
     return lista

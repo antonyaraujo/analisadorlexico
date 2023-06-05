@@ -142,6 +142,17 @@ def verificar_atribuicao(tokens):
         if (tokens[0]['token'] in ['IDE', 'NRO', 'CAC', 'DEL']):
             if (tokens[1]['valor'] == ';'):
                 return [True, tokens[2:]]
+        elif (tokens[0]['valor'] == '['):
+            for token in range(1, len(tokens), 2):
+                if (tokens[token]['token'] in ['NRO', 'IDE', 'CAC']):
+                    if (tokens[token+1]['valor'] == ']'):
+                        print("chegou aqui: " + tokens[tokens+1])
+                        tokens = tokens[token+1]
+                        break
+                    elif (tokens[token+1]['valor'] == ','):
+                        continue
+            if (tokens[0] == ']'):
+                return [True, tokens]
         else:
             return [False, tokens[0:], tokens[0]['linha'], 'Esperava IDE, NRO, CAC ou \'[\' \']\'']
     return [False, tokens[0:], tokens[0]['linha'], 'Esperava IDE, NRO, CAC ']
@@ -599,7 +610,7 @@ def bloco_expressoes(tokens):
     if (expressao[0]):
         return expressao
     else:
-        return [False, expressao[1], expressao[2], expressao[3]]
+        return [False, expressao[1], expressao[2], 'Esperava if, while, struct, print, read, function, procedure, var ou atribuição']
 
 
 def bloco_if(tokens):
@@ -632,14 +643,6 @@ def bloco_start(tokens, coringa):
             retorno = expressao
             break
     return retorno
-    if (tokens[0]['valor'] == coringa):
-        return [True, expressao[1]]
-    else:
-        verificacao = bloco_start(expressao[1], coringa)
-        print("VERIFICAÇÃO: " + str(verificacao[1][0]))
-        print("EXPRESSÃO: " + str(expressao[1][0]))
-        if (verificacao[1][0] == expressao[1][0]):
-            return [True, verificacao[1]]
 
 
 def bloco_expressoes_globais(tokens):
@@ -677,7 +680,7 @@ def bloco_expressoes_globais(tokens):
     if (expressao[0]):
         return expressao
     else:
-        return [False, expressao[1], expressao[2], expressao[3]]
+        return [False, expressao[1], expressao[2], 'Esperava const, var, procedure, function, struct']
 
 
 def bloco_global(tokens):

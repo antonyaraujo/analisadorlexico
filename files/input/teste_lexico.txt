@@ -1,12 +1,7 @@
+/* aloou tereza  */
+start(){	
 var{
-	int a = 3;
-}
-// alo
-/* Pessoas 
-lindas  */
-start(){
-var{
-	int a = 3;
+	int a = [0, 0, 0];
 }
 print("alou");
 read(gaston);
