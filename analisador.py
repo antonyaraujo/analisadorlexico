@@ -5,22 +5,8 @@ Discente: Antony Araujo
 '''
 
 import os
+from lexico import *
 
-# Analisador token
-digito = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-letra = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",]
-delimitadores = [";", ",", "(", ")", "[", "]", "{", "}", "."]
-reservadas = ["var", "const", "struct", "procedure", "function", "start", "return", "if", "else", "then", "while", "read", "print", "int", "real", "boolean", "string", "true", "false"]
-aritmeticos = ["+", "-", "/", "*", "++", "--"]
-relacionais = ["!=", "==", "<", "<=", ">", ">=", "="]
-logicos = ["!", "&&", "||"]
-espaco = [" ", "\t", "  "]
-
-tabela_ascii = []
-for i in range(32, 126): 
-    tabela_ascii.append(chr(i))
-tabela_ascii.pop(2)
-tabela_ascii.append(chr(9))
 
 def ler_arquivo(caminho_arquivo):
     arquivo = open('files/input/' + caminho_arquivo)
@@ -28,7 +14,9 @@ def ler_arquivo(caminho_arquivo):
     arquivo.close()
     return linhas
 
-# Funcao responsavel por escrever os tokens e 
+# Funcao responsavel por escrever os tokens e
+
+
 def escrever_arquivo(caminho_arquivo, tokens, erros):
     buffer = ""
     for token in tokens:
@@ -39,259 +27,600 @@ def escrever_arquivo(caminho_arquivo, tokens, erros):
     for erro in erros:
         buffer += erro + "\n"
 
-    arquivo = open("files/output/"+caminho_arquivo.replace(".txt", "")+'-saida.txt', 'w')
+    arquivo = open("files/output/" +
+                   caminho_arquivo.replace(".txt", "")+'-saida.txt', 'w')
     arquivo.write(buffer)
 
-def adicionar_token(tokens, linha, sigla, lexema):
-    token = str(linha).zfill(2) + " " + sigla + " " + lexema
-    tokens.append(token)
 
-def adicionar_erro(erros, linha, sigla, lexema):
-    erro = str(linha).zfill(2) + " " + sigla + " " + lexema
-    erros.append(erro)
+def analise_constante(tokens):
+    for i in range(len(tokens)):
+        if (tokens[0]['token'] == 'PRE'):
+            if (tokens[0]['valor'] == 'const'):
+                if (tokens[1]['token'] == 'DEL'):
+                    if (tokens[1]['valor'] == '{'):
+                        retorno = verificar_atribuicao_const(tokens[2:])
+                        if (retorno[0]):
+                            if (retorno[1][0]['token'] == 'DEL'):
+                                if (retorno[1][0]['valor'] == '}'):
+                                    return [True, retorno[1][1:]]
 
-def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
-# Percorre caracter a caracter da linha
-    acumulador = inicial    
-    for caracter in linha:
-        # Adiciona o caracter ao acumulador
-        acumulador += caracter
-        # verifica se o caracter inicial do lexema é válido        
-        if(acumulador[0] in tabela_ascii or acumulador[0] != "\""):                        
-            # Classifica delimitadores de comentário            
-            if(acumulador[0] == "/"):                             
-                if(len(acumulador) > 1):
-                    if(acumulador[1] == "*"): # É um comentário em bloco                        
-                        # Verifica se o comentário em bloco foi fechado                            
-                        if(acumulador[len(acumulador)-1] == "/" and acumulador[len(acumulador)-2] == "*"):                                
-                            adicionar_token(tokens, contagem_linha, "CoM", acumulador)
-                            acumulador = ""
-                        else:                            
-                            next
-                    else: # se for um comentário em linha
-                        if(acumulador[1] == "/"):
-                            next
-                        else:
-                            # Classifica a barra como operador aritmético e parte para o próximo estado                                
-                            adicionar_token(tokens, contagem_linha, "ART", acumulador[0])                            
-                            acumulador = acumulador[1:]
-            else:                    
-                # Classifica delimitadores                    
-                if(acumulador[0] in delimitadores):
-                    adicionar_token(tokens, contagem_linha, "DEL", acumulador[0])                        
-                    acumulador = acumulador[1:]
-                else:
-                    # Verifica espaço e tab e separa                    
-                    if(acumulador[0] == "\t" or acumulador[0] in espaco):                            
-                        acumulador = acumulador[1:]
-                        next
-                    else:
-                        # Classifica numeros
-                        if(acumulador[0] in digito or acumulador[0] == '-' or acumulador[0] in espaco):
-                            print("caractere", caracter)
-                            print("acumulador", acumulador)
 
-                            # Verificar ponto no número                                                                
-                            if(acumulador[0] == "-"): # É um número negativo
-                                if(len(acumulador) > 1):
-                                    if(caracter == "."):
-                                        print("chega aqui")
-                                        if(acumulador[:-1].find('.') != -1):
-                                            adicionar_erro(erros, contagem_linha, "NMF", acumulador[:-1])
-                                            acumulador=""
-                                    else:                                                                                                                                                         
-                                            if(caracter == '-'):
-                                                if(len(acumulador) == 2):                                                        
-                                                    if(acumulador[len(acumulador)-2] == "-"):                                                        
-                                                        adicionar_token(tokens, contagem_linha, "ART", acumulador)
-                                                        acumulador=""
-                                                else:                                                  
-                                                    if(acumulador[len(acumulador)-2] == "-"):
-                                                        adicionar_token(tokens, contagem_linha, "ART", acumulador)                                                            
-                                                        acumulador=caracter                                              
-                                            else:
-                                                if(caracter not in digito):                                                                                                                                                                
-                                                    if(acumulador[len(acumulador)-2] in digito):                                                                
-                                                        adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
-                                                        acumulador = caracter
-                                                    else:
-                                                        if(acumulador[len(acumulador)-1] in digito and acumulador[len(acumulador)-2 == "-"]):
-                                                            adicionar_token(tokens, contagem_linha, "ART", acumulador[:-1])                                                                
-                                                            acumulador=acumulador[len(acumulador)-1]
-                                                        else:
-                                                            print("segue um caso ##")
-                                                            print(acumulador)
-                                                            adicionar_token(tokens, contagem_linha, "ART", acumulador[:-1])
-                                                            acumulador = caracter
-                                                else:
-                                                    if(len(acumulador) > 2):                                                                                                                                                   
-                                                        if(caracter != "-"):                                                                                                                                                                                    
-                                                            adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-2])
-                                                            adicionar_token(tokens, contagem_linha, "ART", acumulador[len(acumulador)-2])
-                                                            acumulador = acumulador[len(acumulador)-1]
-                                                        else:
-                                                            if(acumulador[len(acumulador)-2] in digito):
-                                                                adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
-                                                                acumulador = caracter
-                                                            else:
-                                                                if(acumulador[len(acumulador)-2] == "-"):                                                                                                                                        
-                                                                    adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-2])
-                                                                    adicionar_token(tokens, contagem_linha, "ART", "--")
-                                                                    acumulador = ""
-                                                    
-                            else: # Número positivo
-                                if(acumulador[0] in digito):
-                                    if(caracter not in digito or caracter not in espaco):                                            
-                                        if(caracter == "."):                                                
-                                            if(acumulador[:-1].find('.') != -1):
-                                                if(acumulador[len(acumulador)-2] in digito):
-                                                    adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
-                                                else:
-                                                    adicionar_erro(erros, contagem_linha, "NMF", acumulador[:-1])
-                                                acumulador=caracter
-                                            else:
-                                                next
-                                        else:
-                                            if(caracter not in digito):                                                
-                                                if(acumulador[len(acumulador)-2] in digito):                                                    
-                                                    adicionar_token(tokens, contagem_linha, "NRO", acumulador[:-1])
-                                                else:
-                                                    adicionar_erro(erros, contagem_linha, "NMF", acumulador[:-1])
-                                                acumulador = caracter
-                                                next                                                               
-                                    else:
-                                        if(caracter == "."):
-                                            print("")
+def verificar_atribuicao_const(tokens):
+    for i in range(len(tokens)):
+        if (tokens[0]['token'] == 'PRE'):
+            # Verifica se foi adicionado o tipo à declaração atual de variável
+            if (tokens[0]['valor'] in tipos):
+                # Altera o inicio da range, removendo o token já verificado anteriormente
+                for j in range(1, len(tokens)-2):
+                    # Verifica se foi adicionado um identificador
+                    if (tokens[j]['token'] == 'IDE'):
+                        # ATRIBUICAO MULTIPLA DE VARIAVEL OU DECLARACAO SEM ATRIBUICAO DE VALOR
+                        # Verifica se foi adicionado virgula
+                        if (tokens[j+1]['token'] == 'DEL'):
+                            if (tokens[j+1]['valor'] == ','):
+                                if (tokens[j+2]['token'] == 'REL'):
+                                    if (tokens[j+2]['valor'] == '='):
+                                        return verificar_atribuicao(tokens[j+3:])
                                 else:
-                                    if(acumulador[0] in espaco):
-                                        if(caracter not in espaco):
-                                            acumulador= acumulador[:-1]
-                        else:
-                            # Classifica operadores aritmeticos
-                                if(acumulador[0] in aritmeticos):                                            
-                                    if(acumulador[0] in aritmeticos and (caracter != "+" or caracter != "-")):                                                                                                                                            
-                                        adicionar_token(tokens, contagem_linha, "ART", acumulador[:-1])
-                                        acumulador = caracter
-                                    else:
-                                        if(acumulador in aritmeticos):                                                    
-                                            adicionar_token(tokens, contagem_linha, "ART", acumulador)
-                                            acumulador = ""
+                                    j += 2
+                                    continue
+                            # Verifica atribuicao de vetor
+                            if (tokens[j+1]['valor'] == '['):
+                                if (tokens[j+2]['token'] in ['NRO']):
+                                    if (tokens[j+3]['token'] == 'DEL'):
+                                        if (tokens[j+3]['valor'] == ']'):
+                                            if (tokens[j+4]['token'] == 'REL'):
+                                                if (tokens[j+4]['valor'] == '='):
+                                                    return verificar_atribuicao
+                            if (tokens[j+2]['valor'] == ';'):
+                                return [False, []]
+                        # ATRIBUICAO UNICA DE VARIAVEL
+                        if (tokens[j+1]['token'] == 'REL'):  # Verifica se foi adicionado '='
+                            if (tokens[j+1]['valor'] == '='):
+                                return verificar_atribuicao(tokens[j+2:])
+                    j += 2
+        i += 1
+    return [False, []]
+
+
+def analise_variavel(tokens):
+    for i in range(len(tokens)):
+        if (tokens[0]['token'] == 'PRE'):
+            if (tokens[0]['valor'] == 'var'):
+                if (tokens[1]['token'] == 'DEL'):
+                    if (tokens[1]['valor'] == '{'):
+                        retorno = verificar_atribuicao_var(tokens[2:])
+                        if (retorno[0]):
+                            if (retorno[1][0]['token'] == 'DEL'):
+                                if (retorno[1][0]['valor'] == '}'):
+                                    return [True, retorno[1][1:]]
+
+
+def verificar_atribuicao_var(tokens):
+    for i in range(len(tokens)):
+        if (tokens[0]['token'] == 'PRE'):
+            # Verifica se foi adicionado o tipo à declaração atual de variável
+            if (tokens[0]['valor'] in tipos):
+                # Altera o inicio da range, removendo o token já verificado anteriormente
+                for j in range(1, len(tokens)-2):
+                    # Verifica se foi adicionado um identificador
+                    if (tokens[j]['token'] == 'IDE'):
+                        # ATRIBUICAO MULTIPLA DE VARIAVEL OU DECLARACAO SEM ATRIBUICAO DE VALOR
+                        # Verifica se foi adicionado virgula
+                        if (tokens[j+1]['token'] == 'DEL'):
+                            if (tokens[j+1]['valor'] == ','):
+                                if (tokens[j+2]['token'] == 'REL'):
+                                    if (tokens[j+2]['valor'] == '='):
+                                        return verificar_atribuicao(tokens[j+3:])
                                 else:
-                                    if(acumulador[0] == "!"):
-                                        if(acumulador == "!="):                                                    
-                                            adicionar_token(tokens, contagem_linha, "REL", acumulador)
-                                            acumulador = ""
-                                        else:                                                    
-                                            adicionar_token(tokens, contagem_linha, "LOG", acumulador[0])
-                                            acumulador = acumulador[1:]
-                                    else:
-                                        #Classifica operadores relacionais
-                                        if(acumulador[0] in relacionais):
-                                            if(acumulador[0] == "<" or acumulador[0] == ">" or acumulador[0] == "="):
-                                                if(caracter not in relacionais):                                                            
-                                                    adicionar_token(tokens, contagem_linha, "REL", acumulador[:-1])
-                                                    acumulador = caracter
-                                                else:
-                                                    next
-                                            else:
-                                                if(acumulador in relacionais):                                                            
-                                                    adicionar_token(tokens, contagem_linha, "REL", acumulador)
-                                                    acumulador = ""
-                                        else:
-                                            # Classifica operadores lógicos                                                                                       
-                                            if(acumulador[0] == "&" or acumulador[0] == "|"):                                                
-                                                if(acumulador in logicos):                                                                                                                
-                                                    adicionar_token(tokens, contagem_linha, "LOG", acumulador)
-                                                    acumulador = ""                                        
-                                                else:
-                                                    next
-                                            else:
-                                                # Classifica identificadores
-                                                if(acumulador[0] in letra):
-                                                    # Classifica palavras reservadas
-                                                    if(acumulador in reservadas):
-                                                        adicionar_token(tokens, contagem_linha, "PRE", acumulador)
-                                                        acumulador = ""
-                                                    else:                                                        
-                                                        if(caracter not in letra and caracter not in digito and caracter != "_" and caracter not in espaco):                                                                                                                                        
-                                                            adicionar_token(tokens, contagem_linha, "IDE", acumulador[:-1])
-                                                            acumulador = caracter                                                                                                                                    
-                                                        else:
-                                                            if(caracter in espaco):
-                                                                if(acumulador[0] == "/"):
-                                                                    next
-                                                                else:                                                                    
-                                                                    adicionar_token(tokens, contagem_linha, "IDE", acumulador[:-1])
-                                                                    acumulador = caracter
+                                    j += 2
+                                    continue
+                            if (tokens[j+2]['valor'] == ';'):
+                                return True
+                        # ATRIBUICAO UNICA DE VARIAVEL
+                        if (tokens[j+1]['token'] == 'REL'):  # Verifica se foi adicionado '='
+                            if (tokens[j+1]['valor'] == '='):
+                                return verificar_atribuicao(tokens[j+2:])
+                    j += 2
+        i += 1
+    return [False, tokens, tokens[0]['linha'], 'Esperava tipo ' + str(tipos)]
 
-                                                else:
-                                                    # Token mal formado                                                    
-                                                    print("ERRO: ", acumulador)
-                                                    erro = str(contagem_linha).zfill(2) + " TMF " + acumulador[:-1]
-                                                    erros.append(erro)
-                                                    acumulador = caracter
-        else:                                 
-            # verifica se é uma cadeia de caracteres               
-            if(acumulador[0] == "\""):
-                if(len(acumulador) >= 1):
-                    if(caracter not in tabela_ascii):
-                        erro = str(contagem_linha).zfill(2) + " CMF " + acumulador
-                        erros.append(erro)
-                        acumulador = ""
-                    else:
-                        if(caracter == "\""):                                
-                            adicionar_token(tokens, contagem_linha, "CAC", acumulador)
-                            acumulador = ""
-                        else:
-                            next
 
-            else:
-                # Se o caracter não é válido (de 32 a 126 a tabela ASCII, com excecao do 34 e acrescimo do caracter de tab (9))                                   
-                if(len(acumulador)>=4):
-                    if(acumulador[len(acumulador)-2] != "*" and acumulador[len(acumulador)-1] != "/"):
-                        adicionar_erro(erros, contagem_linha, 'CoMF', acumulador)
-                    else:
-                        erro = str(contagem_linha).zfill(2) + " TMF " + caracter
-                        erros.append(erro)
-
-def analise(arquivo):
-    erros = []
-    tokens = []
-    acumulador = ""
-    contagem_linha = 0
-    for linha in arquivo:        
-        contagem_linha += 1
-        corrigida = linha.replace("\n", " ")        
-        # Verifica se há um comentário
-        if(len(acumulador) > 1):
-            if(acumulador[0] == "/" and acumulador[1] == "/"):                
-                adicionar_token(tokens, contagem_linha, "CoM", acumulador)                                 
-                acumulador = ""        
-        analisa_caracter(corrigida, acumulador, tokens, erros, contagem_linha)
-    
-    if(len(acumulador) != 0):
-        if(acumulador[0] == "\""):
-            adicionar_erro(erros, contagem_linha, "CMF", acumulador)                      
-            acumulador=""
+def verificar_atribuicao(tokens):
+    verificado = verificar_aritmetica(tokens[0:])
+    if (verificado[0]):
+        tokens = verificado[1]
+        if (tokens[0]['valor'] == ";"):
+            return [True, tokens[1:]]
+    else:
+        if (tokens[0]['token'] in ['IDE', 'NRO', 'CAC', 'DEL']):
+            if (tokens[1]['valor'] == ';'):
+                return [True, tokens[2:]]
         else:
-            if(len(acumulador) > 1):
-                if(acumulador[0] == "/" and acumulador[1] == "*"):
-                    adicionar_erro(erros, contagem_linha, "CoMF", acumulador)                    
-                    acumulador=""
+            return [False, tokens[0:], tokens[0]['linha'], 'Esperava IDE, NRO, CAC ou \'[\' \']\'']
+    return [False, tokens[0:], tokens[0]['linha'], 'Esperava IDE, NRO, CAC ']
 
-    return [tokens, erros]
+
+def verificar_struct(tokens):
+    for i in range(len(tokens)):
+        if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'struct'):
+            if (tokens[1]['token'] == 'IDE'):
+                if (tokens[2]['token'] == 'DEL' and tokens[2]['valor'] == '{'):
+                    retorno = verificar_atribuicoes_struct(tokens[3:])
+                    if (retorno[1][0]['token'] == 'DEL' and retorno[1][0]['valor'] == '}'):
+                        return [True, retorno[1][1:]]
+                    else:
+                        return [False, retorno[1][0:], retorno[1][0]['linha'], 'Esperava \'}\'']
+                else:
+                    return [False, tokens[2:], tokens[2]['linha'], 'Esperava \'{\'']
+            else:
+                return [False, tokens[1:], tokens[1]['linha'], 'Esperava IDE']
+        else:
+            return [False, tokens[0:], tokens[0]['linha'], 'Esperava struct']
+    return [False, tokens[0:], tokens[0]['linha'], 'Esperava IDE, NRO, CAC ']
+
+
+def verificar_condicional(tokens):
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'if'):
+        if (tokens[1]['token'] == 'DEL'):
+            if (tokens[1]['valor'] == '('):
+                retorno = verificar_logica(tokens[2:])
+                if (retorno[0]):
+                    if (retorno[1][0]['token'] == 'DEL'):
+                        if (retorno[1][0]['valor'] == ')'):
+                            if (retorno[1][1]['token'] == 'PRE'):
+                                if (retorno[1][1]['valor'] == 'then'):
+                                    if (retorno[1][2]['token'] == 'DEL'):
+                                        if (retorno[1][2]['valor'] == '{'):
+                                            retorno = bloco_expressoes(
+                                                retorno[1][3:])
+                                            if (retorno[1][0]['valor'] == '}'):
+                                                return [True, retorno[1][1:]]
+                                            else:
+                                                return [False, retorno[1], retorno[1][0]['linha'], 'Esperado \'}\'']
+                else:
+                    print_erro(retorno, False)
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava if']
+    return [False, tokens[0:], tokens[0]['linha'], 'Esperado \'}\'']
+
+
+def verificar_loop(tokens):
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'while'):
+        if (tokens[1]['token'] == 'DEL'):
+            if (tokens[1]['valor'] == '('):
+                retorno = verificar_logica(tokens[2:])
+                if (retorno[0]):
+                    if (retorno[1][0]['token'] == 'DEL'):
+                        if (retorno[1][0]['valor'] == ')'):
+                            if (retorno[1][1]['token'] == 'PRE'):
+                                if (retorno[1][1]['valor'] == 'then'):
+                                    if (retorno[1][2]['token'] == 'DEL'):
+                                        if (retorno[1][2]['valor'] == '{'):
+                                            retorno = bloco_expressoes(
+                                                retorno[1][3:])
+                                            if (retorno[1][0]['valor'] == '}'):
+                                                return [True, retorno[1][1:]]
+                                            else:
+                                                return [False, retorno[1], retorno[1][0]['linha'], 'Esperado \'}\'']
+                else:
+                    print_erro(retorno, False)
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava if']
+    return [False, tokens[0:], tokens[0]['linha'], 'Esperado \'}\'']
+
+
+def verificar_expressao_logica(tokens):
+    if (tokens[0]['token'] == 'PRE'):
+        if (tokens[0]['valor'] == 'true' or tokens[0]['valor'] == 'false'):
+            if (tokens[1]['token'] == 'DEL'):
+                if (tokens[1]['valor'] == ')' or tokens[1]['valor'] == ';'):
+                    return [True, tokens[1:]]
+    if (tokens[0]['token'] == 'NRO' or tokens[0]['token'] == 'IDE'):
+        if (tokens[1]['token'] == "LOG"):
+            return verificar_logica(tokens[2:])
+        if (tokens[1]['valor'] == ')'):
+            return [True, tokens[1:]]
+    if (tokens[0]['valor'] == ')'):
+        return [True, tokens[0:]]
+    return [False, tokens]
+
+# Verifica expressão lógica
+
+
+def verificar_logica(tokens):
+    for i in range(0, len(tokens), 2):
+        print("i = " + str(i), "valor = " + str(tokens[i]['valor']))
+        print("i+1 = " + str(i+1) + "valor = " + str(tokens[i+1]['valor']))
+        print("i+2 = " + str(i+2) + "valor = " + str(tokens[i+2]['valor']))
+        if (tokens[i]['token'] == 'NRO' or tokens[i]['token'] == 'IDE' or tokens[i]['token'] == 'PRE'):
+            if (tokens[i]['token'] == 'PRE'):
+                if (tokens[i]['valor'] != 'true' and tokens[i]['valor'] != 'false'):
+                    return [False, tokens[i], tokens[i]['linha'], 'Expressão inválida)']
+            if (tokens[i+1]['token'] == 'REL'):
+                tokens = verificar_relacional(tokens[i:])[1]
+            if (tokens[i+1]['token'] == 'LOG' or tokens[i+1]['valor'] == ')'):
+                if (tokens[i+1]['valor'] == ')'):
+                    return [True, tokens[i+1:]]
+                else:
+                    if (tokens[i+2]['valor'] != ')' and tokens[i+2]['token'] != 'LOG'):
+                        return verificar_logica(tokens[i+2:])
+                    else:
+                        if (tokens[i+1]['token'] == 'REL'):
+                            tokens = verificar_relacional(tokens[i:])[1]
+                        else:
+                            return [False, tokens[i+1], tokens[i+i]['linha'], 'Esperado NRO, IDE, true ou false']
+            else:
+                return [False, tokens[i+1], tokens[i+i]['linha'], 'Esperado LOG ou )']
+        else:
+            if (tokens[i]['valor'] == ')'):
+                return [True, tokens[i:], tokens[i]['linha']]
+            else:
+                return [False, tokens[i], tokens[i]['linha'], 'Esperado NRO, IDE, true ou false']
+    return [False, tokens, -1, 'Expressão lógica incorreta']
+
+# realiza a verificacao de uma expressao aritmetica (ART)
+
+
+def expressao_base(tokens):
+    if (tokens[0]['token'] in ['NRO', 'IDE']):
+        if (tokens[1]['token'] == 'ART'):
+            if (tokens[2]['token'] in ['NRO', 'IDE']):
+                return [True, tokens[3:]]
+            else:
+                return [False, tokens, tokens[2]['linha'], 'Esperava NRO ou IDE']
+        else:
+            return [False, tokens, tokens[1]['linha'], 'Esperava ' + str(aritmeticos)]
+    else:
+        return [False, tokens, tokens[0]['linha'], 'Esperava NRO ou IDE']
+
+
+def expressao_secundaria(tokens):
+    if (tokens[0]['token'] == 'ART'):
+        if (tokens[1]['token'] in ['NRO', 'IDE']):
+            return [True, tokens[2:]]
+        else:
+            # Pode ser uma expressão numérica ()
+            return [False, tokens, tokens[1]['linha'], 'Esperava NRO ou IDE']
+    else:
+        return [False, tokens, tokens[0]['linha'], 'Esperava ' + str(aritmeticos)]
+
+
+def verificar_aritmetica(tokens):
+    if (tokens[0]['token'] in ['NRO', 'IDE']):
+        expressao = expressao_base(tokens)
+        if (expressao[0]):
+            tokens = expressao[1]
+            if (tokens[0]['token'] == 'ART'):
+                if (tokens[1]['token'] in ['NRO', 'IDE'] or tokens[1]['valor'] == '('):
+                    expressao = verificar_aritmetica(tokens[1:])
+                    if (expressao[0]):
+                        return [True, expressao[1]]
+                    else:
+                        tokens = expressao[1]
+                        return [False, tokens, tokens[0]['linha'], 'Esperava NRO, IDE ou \'(\'']
+                else:
+                    return [False, tokens[1:], tokens[1]['linha'], 'Esperava NRO ou IDE']
+            else:
+                return [True, tokens]
+        else:
+            if (expressao[1][0]['token'] in ['NRO', 'IDE'] and expressao[1][1]['valor'] == ';'):
+                return [True, expressao[1][1:]]
+            elif (expressao[1][0]['token'] in ['NRO', 'IDE'] and expressao[1][1]['token'] == 'ART'):
+                if (expressao[1][2]['valor'] == '('):
+                    return verificar_aritmetica(expressao[1][2:])
+    elif (tokens[0]['valor'] == '('):
+        expressao = verificar_aritmetica(tokens[1:])
+        if (expressao[0]):
+            tokens = expressao[1]
+            if (tokens[0]['valor'] == ')'):
+                if (tokens[1]['token'] == 'ART' and tokens[2]['token'] in ['NRO', 'IDE']):
+                    expressao = verificar_aritmetica(tokens[2:])
+                    if (expressao[0]):
+                        return [True, expressao[1]]
+                    else:
+                        return [False, expressao[1], expressao[1][0]['linha'], 'Esperava \')\'']
+                else:
+                    return [True, tokens[1:]]
+            else:
+                return [False, tokens, tokens[0]['linha'], 'Esperava \')\'']
+    elif (tokens[0]['valor'] == ';'):
+        return [True, tokens]
+    else:
+        return [False, tokens, tokens[0]['linha'], 'Esperava NRO, IDE ou \'(\'']
+    return [False, tokens, tokens[0]['linha'], 'Esperava expressão aritmetica']
+
+
+# realiza a verificao de uma condicao relacional
+def verificar_relacional(tokens):
+    if (tokens[0]['token'] == 'NRO' or tokens[0]['token'] == 'IDE' or tokens[0]['token'] == 'PRE'):
+        if (tokens[0]['token'] == 'PRE'):
+            if (tokens[0]['valor'] != 'true' and tokens[0]['valor'] != 'false'):
+                return [False, tokens[0:], tokens[0]['linha'], 'Expressão inválida)']
+        if (tokens[1]['token'] == 'REL'):
+            if (tokens[2]['token'] == 'NRO' or tokens[2]['token'] == 'IDE' or tokens[2]['token'] == 'PRE'):
+                if (tokens[2]['token'] == 'PRE'):
+                    if (tokens[2]['valor'] != 'true' and tokens[2]['valor'] != 'false'):
+                        return [False, tokens[2:], tokens[2]['linha'], 'Expressão inválida)']
+                return [True, tokens[2:]]
+            else:
+                return [False, tokens[2:], tokens[2]['linha'], 'Esperado NRO, IDE, true ou false']
+        else:
+            return [False, tokens[1:], tokens[1]['linha'], 'Esperando ' + str(relacionais[:-1])]
+    return [False, tokens[2:], tokens[2]['linha'], 'Esperado NRO, IDE, true ou false']
+
+
+def verificar_expressao(tokens):
+    expressao_aritmetica = verificar_aritmetica(tokens[0:])
+    expressao_logica = verificar_expressao_logica(tokens[0:])
+    if (expressao_aritmetica[0] or expressao_logica[0]):
+        if (expressao_aritmetica[0]):
+            tokens = expressao_aritmetica[1]
+        elif (expressao_logica[0]):
+            tokens = expressao_logica[1]
+        if (tokens[0]['token'] == 'LOG'):
+            expressao = verificar_expressao(tokens[1:])
+            return expressao
+        if (expressao_aritmetica[0]):
+            return expressao_aritmetica
+        elif (expressao_logica[0]):
+            return expressao_logica
+        elif (tokens[0]['token'] == 'DEL' and tokens[0]['valor'] == ';'):
+            return [True, tokens[1:]]
+        else:
+            return [False, tokens[0:], tokens[0]['linha'], 'Esperava \';\'']
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava expressão relacional, lógica ou aritmética']
+
+
+def verificar_atribuicoes_struct(tokens):
+    for i in range(len(tokens)):
+        if (tokens[0]['token'] in ['PRE', 'IDE']):
+            # <struct_var> ::= tipo <struct_aux> <struct_var>
+            # <struct_aux> ::= ide <struct2> | <vetor> <struct2> | <matriz> <struct2>
+            # <struct2> ::= ',' <struct_aux> |  ';'
+            if (tokens[0]['token'] == 'PRE'):
+                if (tokens[0]['valor'] in tipos):
+                    if (tokens[1]['token'] == 'IDE'):
+                        for j in range(2, len(tokens)-1):
+                            if (tokens[j]['token'] == 'DEL'):
+                                if (tokens[j]['valor'] == ','):
+                                    if (tokens[j+1]['token'] == 'IDE'):
+                                        continue
+                                if (tokens[j]['valor'] == ';'):
+                                    return [True, tokens[j+1:]]
+
+# Automato de verificacao de print()
+
+
+def verificar_print(tokens):
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'print'):
+        if (tokens[1]['valor'] == '('):
+            if (tokens[2]['token'] == 'CAC'):
+                if (tokens[3]['valor'] == ')'):
+                    if (tokens[4]['valor'] == ';'):
+                        return [True, tokens[5:]]
+                    else:
+                        return [False, tokens[1:], tokens[1]['linha'], 'esperava \';\'']
+                else:
+                    return [False, tokens[1:], tokens[1]['linha'], 'esperava \')\'']
+        else:
+            return [False, tokens[1:], tokens[1]['linha'], 'esperava \'(\'']
+    else:
+        return [False, tokens, tokens[0]['linha'], 'Esperava print']
+
+# Automato de verificacao de read()
+
+
+def verificar_read(tokens):
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'read'):
+        if (tokens[1]['valor'] == '('):
+            if (tokens[2]['token'] == 'IDE'):  # Pode ser IDE, matriz[1][1] ou vetor[2]
+                if (tokens[3]['valor'] == ')'):
+                    if (tokens[4]['valor'] == ';'):
+                        return [True, tokens[5:]]
+                    else:
+                        return [False, tokens[1:], tokens[1]['linha'], 'esperava \';\'']
+                else:
+                    return [False, tokens[1:], tokens[1]['linha'], 'esperava \')\'']
+        else:
+            return [False, tokens[1:], tokens[1]['linha'], 'esperava \'(\'']
+    else:
+        return [False, tokens, tokens[0]['linha'], 'Esperava read']
+# Verificacao de Funcao
+
+
+def verificar_parametros(tokens):
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] in tipos):
+        if (tokens[1]['token'] == 'IDE'):
+            if (tokens[2]['token'] == 'DEL' and tokens[2]['valor'] == ','):
+                return verificar_parametros(tokens[3:])
+            elif (tokens[2]['token'] == 'DEL' and tokens[2]['valor'] == ')'):
+                return [True, tokens[3:]]
+            else:
+                return [False, tokens[2:], tokens[2]['linha'], 'Esperava \'(\' ou \',\'']
+        else:
+            return [False, tokens[1:], tokens[1]['linha'], 'Esperava \')\'']
+    else:
+        if (tokens[0]['token'] == 'DEL' and tokens[0]['valor'] == ')'):
+            return [True, tokens[1:]]
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava ' + str(tipos)]
+
+
+def verificar_funcao(tokens):
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'function'):
+        if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '('):
+            retorno_parametros = verificar_parametros(tokens[2:])
+            if (retorno_parametros[0]):
+                tokens = retorno_parametros[1]
+                if (tokens[0]['token'] == 'DEL' and tokens[0]['valor'] == '{'):
+                    retorno_bloco = bloco_expressoes(tokens[1:])
+                    if (retorno_bloco[0]):
+                        tokens = retorno_bloco[1]
+                        if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'return'):
+                            retorno_logico = verificar_expressao(
+                                tokens[1:])
+                            if (retorno_logico[0]):
+                                tokens = retorno_logico[1]
+                                if (tokens[0]['token'] == 'DEL' and tokens[0]['valor'] == ';'):
+                                    if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '}'):
+                                        return [True, tokens[2:]]
+                                    else:
+                                        return [False, tokens[1:], tokens[0]['linha'], 'Esperava \'}\'']
+                                else:
+                                    return [False, tokens[0:], tokens[0]['linha'], 'Esperava \';\'']
+                            else:
+                                return [False, tokens[0:], tokens[0]['linha'], 'Esperava expressão lógica']
+                        else:
+                            return [False, tokens[0:], tokens[0]['linha'], 'Esperava return']
+                    else:
+                        return retorno_bloco
+                else:
+                    return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'{\'']
+            else:
+                return retorno_parametros
+        else:
+            return [False, tokens[1:], tokens[0]['linha'], 'Esperava \'(\'']
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava function']
+
+# Verificacao de procedures
+
+
+def verificar_procedure(tokens):
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'procedure'):
+        if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '('):
+            retorno_parametros = verificar_parametros(tokens[2:])
+            if (retorno_parametros[0]):
+                tokens = retorno_parametros[1]
+                if (tokens[0]['token'] == 'DEL' and tokens[0]['valor'] == '{'):
+                    retorno_bloco = bloco_expressoes(tokens[1:])
+                    if (retorno_bloco[0]):
+                        tokens = retorno_bloco[1]
+                        if (tokens[0]['token'] == 'DEL' and tokens[0]['valor'] == '}'):
+                            return [True, tokens[1:]]
+                        else:
+                            return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'}\'']
+                    else:
+                        return retorno_bloco
+                else:
+                    return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'{\'']
+            else:
+                return retorno_parametros
+        else:
+            return [False, tokens[1:], tokens[0]['linha'], 'Esperava \'(\'']
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava function']
+
+
+def bloco_expressoes(tokens):
+    # print(tokens[0])
+    # if
+    expressao = verificar_condicional(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+
+    # while
+    expressao = verificar_loop(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+
+    # struct
+    expressao = verificar_struct(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+
+    # print
+#    print("CHEGA NO PRINT" + str(tokens[0]))
+    expressao = verificar_print(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+
+    # read
+    expressao = verificar_read(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+
+    # function
+    expressao = verificar_funcao(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+
+    # procedure
+    expressao = verificar_procedure(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+
+    # atribuicao
+    if (tokens[0]['token'] == 'IDE'):
+        if (tokens[1]['valor'] == '='):
+            expressao = verificar_atribuicao(tokens[2:])
+            if (expressao[0]):
+                tokens = expressao[1]
+    return expressao
+
+
+def bloco_start(tokens, coringa):
+    expressao = bloco_expressoes(tokens)
+    if (tokens[0]['valor'] == coringa):
+        return [True, expressao[1]]
+    else:
+        return bloco_start(expressao[1], coringa)
+
+
+def sintatico(lista_tokens):
+    tokens = varredura_tokens(lista_tokens)
+    # START
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] in ['start', 'function', 'procedure', 'const', 'var', 'structure']):
+        if (tokens[0]['valor'] == 'start'):
+            if (tokens[1]['token'] in ['DEL'] and tokens[1]['valor'] in ['(']):
+                if (tokens[2]['token'] in ['DEL'] and tokens[2]['valor'] in [')']):
+                    if (tokens[3]['token'] in ['DEL'] and tokens[3]['valor'] in ['{']):
+                        tokens = tokens[4:]
+                        print("VERIFICA ATUAL: " + str(tokens[0]))
+                        expressao = bloco_start(tokens, "}")
+                        if (expressao[0]):
+                            tokens = expressao[1]
+                        else:
+                            print_erro(expressao, True)
+                    else:
+                        return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'{\'']
+                    if (tokens[0]['valor'] == '}'):
+                        return [True, tokens]
+                    else:
+                        return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'}\'']
+                else:
+                    return [False, tokens[0:], tokens[0]['linha'], 'Esperava \')\'']
+            else:
+                return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'(\'']
+        else:
+            return [False, tokens[0:], tokens[0]['linha'], 'Esperava start']
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava ' + str(['start', 'function', 'procedure', 'const', 'var', 'structure'])]
+
+
+def print_erro(erro, debug):
+    print("Ocorreu um erro na linha " +
+          str(erro[2]) + " Ocasionado por: " + erro[3])
+    if (debug):
+        print(erro[1])
+
 
 def main():
     pasta = './files/input'
     arquivos_filtrados = []
     for diretorio, subpastas, arquivos in os.walk(pasta):
         for arquivo in arquivos:
-            if(arquivo.endswith(".txt")):
+            if (arquivo.endswith(".txt")):
                 arquivos_filtrados.append(arquivo)
-    
+
+    [tokens, erros] = analise(ler_arquivo(arquivo))
+    result = sintatico(tokens)
+    if (result[0]):
+        print("Código compilado com sucesso!!")
     for arquivo in arquivos_filtrados:
-        [tokens, erros] = analise(ler_arquivo(arquivo))
         escrever_arquivo(arquivo, tokens, erros)
-    
-if __name__ == "__main__":    
+
+
+if __name__ == "__main__":
     main()
