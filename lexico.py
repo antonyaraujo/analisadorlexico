@@ -24,6 +24,7 @@ for i in range(32, 126):
 tabela_ascii.pop(2)
 tabela_ascii.append(chr(9))
 
+
 def adicionar_token(tokens, linha, sigla, lexema):
     token = str(linha).zfill(2) + " " + sigla + " " + lexema
     tokens.append(token)
@@ -254,7 +255,7 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                     if (caracter == "\""):
                         validacao = True
                         for value in acumulador:
-                            if (value not in tabela_ascii):
+                            if (value not in tabela_ascii and value != "\"" and value != "\'"):
                                 validacao = False
                         if (validacao):
                             adicionar_token(

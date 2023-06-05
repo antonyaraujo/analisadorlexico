@@ -1,6 +1,28 @@
+var{
+	int a = 3;
+}
+
 start(){
-
-print('alo');
-
+var{
+	int a = 3;
+}
+print("alou");
+read(gaston);
+bola = "core";
+struct pessoa{
+	int a;
+}
+var{
+real f = "put";
+}
+print("alou");
+if (true) then{
+	mo = "aa";
+	ma = "bb";
+	print("chocho");
+}
+while(true){
+	print("a");
+}
 
 }

@@ -33,67 +33,72 @@ def escrever_arquivo(caminho_arquivo, tokens, erros):
 
 
 def analise_constante(tokens):
-    for i in range(len(tokens)):
-        if (tokens[0]['token'] == 'PRE'):
-            if (tokens[0]['valor'] == 'const'):
-                if (tokens[1]['token'] == 'DEL'):
-                    if (tokens[1]['valor'] == '{'):
-                        retorno = verificar_atribuicao_const(tokens[2:])
-                        if (retorno[0]):
-                            if (retorno[1][0]['token'] == 'DEL'):
-                                if (retorno[1][0]['valor'] == '}'):
-                                    return [True, retorno[1][1:]]
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'const'):
+        if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '{'):
+            retorno = verificar_atribuicao_var(tokens[2:])
+            if (retorno[0]):
+                if (retorno[1][0]['token'] == 'DEL' and retorno[1][0]['valor'] == '}'):
+                    return [True, retorno[1][1:]]
+                else:
+                    return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'}\'']
+        else:
+            return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'{\'']
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava var']
 
 
 def verificar_atribuicao_const(tokens):
     for i in range(len(tokens)):
-        if (tokens[0]['token'] == 'PRE'):
-            # Verifica se foi adicionado o tipo à declaração atual de variável
-            if (tokens[0]['valor'] in tipos):
-                # Altera o inicio da range, removendo o token já verificado anteriormente
-                for j in range(1, len(tokens)-2):
-                    # Verifica se foi adicionado um identificador
-                    if (tokens[j]['token'] == 'IDE'):
-                        # ATRIBUICAO MULTIPLA DE VARIAVEL OU DECLARACAO SEM ATRIBUICAO DE VALOR
-                        # Verifica se foi adicionado virgula
-                        if (tokens[j+1]['token'] == 'DEL'):
-                            if (tokens[j+1]['valor'] == ','):
-                                if (tokens[j+2]['token'] == 'REL'):
-                                    if (tokens[j+2]['valor'] == '='):
-                                        return verificar_atribuicao(tokens[j+3:])
-                                else:
-                                    j += 2
-                                    continue
-                            # Verifica atribuicao de vetor
-                            if (tokens[j+1]['valor'] == '['):
-                                if (tokens[j+2]['token'] in ['NRO']):
-                                    if (tokens[j+3]['token'] == 'DEL'):
-                                        if (tokens[j+3]['valor'] == ']'):
-                                            if (tokens[j+4]['token'] == 'REL'):
-                                                if (tokens[j+4]['valor'] == '='):
-                                                    return verificar_atribuicao
-                            if (tokens[j+2]['valor'] == ';'):
-                                return [False, []]
-                        # ATRIBUICAO UNICA DE VARIAVEL
-                        if (tokens[j+1]['token'] == 'REL'):  # Verifica se foi adicionado '='
-                            if (tokens[j+1]['valor'] == '='):
-                                return verificar_atribuicao(tokens[j+2:])
-                    j += 2
+        # Verifica se foi adicionado o tipo à declaração atual de variável
+        if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] in tipos):
+            # Altera o inicio da range, removendo o token já verificado anteriormente
+            for j in range(1, len(tokens)-2):
+                # Verifica se foi adicionado um identificador
+                if (tokens[j]['token'] == 'IDE'):
+                    # ATRIBUICAO MULTIPLA DE VARIAVEL OU DECLARACAO SEM ATRIBUICAO DE VALOR
+                    # Verifica se foi adicionado virgula
+                    if (tokens[j+1]['token'] == 'DEL'):
+                        if (tokens[j+1]['valor'] == ','):
+                            if (tokens[j+2]['token'] == 'REL'):
+                                if (tokens[j+2]['valor'] == '='):
+                                    return verificar_atribuicao(tokens[j+3:])
+                            else:
+                                j += 2
+                                continue
+                        # Verifica atribuicao de vetor
+                        if (tokens[j+1]['valor'] == '['):
+                            if (tokens[j+2]['token'] in ['NRO']):
+                                if (tokens[j+3]['token'] == 'DEL'):
+                                    if (tokens[j+3]['valor'] == ']'):
+                                        if (tokens[j+4]['token'] == 'REL'):
+                                            if (tokens[j+4]['valor'] == '='):
+                                                return verificar_atribuicao
+                        if (tokens[j+2]['valor'] == ';'):
+                            return [False, []]
+                    # ATRIBUICAO UNICA DE VARIAVEL
+                    if (tokens[j+1]['token'] == 'REL'):  # Verifica se foi adicionado '='
+                        if (tokens[j+1]['valor'] == '='):
+                            return verificar_atribuicao(tokens[j+2:])
+                j += 2
         i += 1
     return [False, []]
 
 
 def analise_variavel(tokens):
-    for i in range(len(tokens)):
-        if (tokens[0]['token'] == 'PRE'):
-            if (tokens[0]['valor'] == 'var'):
-                if (tokens[1]['token'] == 'DEL'):
-                    if (tokens[1]['valor'] == '{'):
-                        retorno = verificar_atribuicao_var(tokens[2:])
-                        if (retorno[0]):
-                            if (retorno[1][0]['token'] == 'DEL'):
-                                if (retorno[1][0]['valor'] == '}'):
-                                    return [True, retorno[1][1:]]
+    print("chegou aq")
+    print(tokens[0])
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'var'):
+        if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '{'):
+            retorno = verificar_atribuicao_var(tokens[2:])
+            if (retorno[0]):
+                if (retorno[1][0]['token'] == 'DEL' and retorno[1][0]['valor'] == '}'):
+                    return [True, retorno[1][1:]]
+                else:
+                    return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'}\'']
+        else:
+            return [False, tokens[0:], tokens[0]['linha'], 'Esperava \'{\'']
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava var']
 
 
 def verificar_atribuicao_var(tokens):
@@ -127,6 +132,7 @@ def verificar_atribuicao_var(tokens):
 
 
 def verificar_atribuicao(tokens):
+    print("CHEGA ATR")
     verificado = verificar_aritmetica(tokens[0:])
     if (verificado[0]):
         tokens = verificado[1]
@@ -142,44 +148,39 @@ def verificar_atribuicao(tokens):
 
 
 def verificar_struct(tokens):
-    for i in range(len(tokens)):
-        if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'struct'):
-            if (tokens[1]['token'] == 'IDE'):
-                if (tokens[2]['token'] == 'DEL' and tokens[2]['valor'] == '{'):
-                    retorno = verificar_atribuicoes_struct(tokens[3:])
-                    if (retorno[1][0]['token'] == 'DEL' and retorno[1][0]['valor'] == '}'):
-                        return [True, retorno[1][1:]]
-                    else:
-                        return [False, retorno[1][0:], retorno[1][0]['linha'], 'Esperava \'}\'']
+    if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'struct'):
+        if (tokens[1]['token'] == 'IDE'):
+            if (tokens[2]['token'] == 'DEL' and tokens[2]['valor'] == '{'):
+                retorno = verificar_atribuicoes_struct(tokens[3:])
+                if (retorno[1][0]['token'] == 'DEL' and retorno[1][0]['valor'] == '}'):
+                    return [True, retorno[1][1:]]
                 else:
-                    return [False, tokens[2:], tokens[2]['linha'], 'Esperava \'{\'']
+                    return [False, retorno[1][0:], retorno[1][0]['linha'], 'Esperava \'}\'']
             else:
-                return [False, tokens[1:], tokens[1]['linha'], 'Esperava IDE']
+                return [False, tokens[2:], tokens[2]['linha'], 'Esperava \'{\'']
         else:
-            return [False, tokens[0:], tokens[0]['linha'], 'Esperava struct']
+            return [False, tokens[1:], tokens[1]['linha'], 'Esperava IDE']
+    else:
+        return [False, tokens[0:], tokens[0]['linha'], 'Esperava struct']
     return [False, tokens[0:], tokens[0]['linha'], 'Esperava IDE, NRO, CAC ']
 
 
 def verificar_condicional(tokens):
     if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'if'):
-        if (tokens[1]['token'] == 'DEL'):
-            if (tokens[1]['valor'] == '('):
-                retorno = verificar_logica(tokens[2:])
-                if (retorno[0]):
-                    if (retorno[1][0]['token'] == 'DEL'):
-                        if (retorno[1][0]['valor'] == ')'):
-                            if (retorno[1][1]['token'] == 'PRE'):
-                                if (retorno[1][1]['valor'] == 'then'):
-                                    if (retorno[1][2]['token'] == 'DEL'):
-                                        if (retorno[1][2]['valor'] == '{'):
-                                            retorno = bloco_expressoes(
-                                                retorno[1][3:])
-                                            if (retorno[1][0]['valor'] == '}'):
-                                                return [True, retorno[1][1:]]
-                                            else:
-                                                return [False, retorno[1], retorno[1][0]['linha'], 'Esperado \'}\'']
-                else:
-                    print_erro(retorno, False)
+        if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '('):
+            retorno = verificar_logica(tokens[2:])
+            if (retorno[0]):
+                if (retorno[1][0]['token'] == 'DEL' and retorno[1][0]['valor'] == ')'):
+                    if (retorno[1][1]['token'] == 'PRE' and retorno[1][1]['valor'] == 'then'):
+                        if (retorno[1][2]['token'] == 'DEL' and retorno[1][2]['valor'] == '{'):
+                            retorno = bloco_if(
+                                retorno[1][3:])
+                            if (retorno[1][0]['valor'] == '}'):
+                                return [True, retorno[1][1:]]
+                            else:
+                                return [False, retorno[1], retorno[1][0]['linha'], 'Esperado \'}\'']
+            else:
+                print_erro(retorno, False)
     else:
         return [False, tokens[0:], tokens[0]['linha'], 'Esperava if']
     return [False, tokens[0:], tokens[0]['linha'], 'Esperado \'}\'']
@@ -187,24 +188,19 @@ def verificar_condicional(tokens):
 
 def verificar_loop(tokens):
     if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'while'):
-        if (tokens[1]['token'] == 'DEL'):
-            if (tokens[1]['valor'] == '('):
-                retorno = verificar_logica(tokens[2:])
-                if (retorno[0]):
-                    if (retorno[1][0]['token'] == 'DEL'):
-                        if (retorno[1][0]['valor'] == ')'):
-                            if (retorno[1][1]['token'] == 'PRE'):
-                                if (retorno[1][1]['valor'] == 'then'):
-                                    if (retorno[1][2]['token'] == 'DEL'):
-                                        if (retorno[1][2]['valor'] == '{'):
-                                            retorno = bloco_expressoes(
-                                                retorno[1][3:])
-                                            if (retorno[1][0]['valor'] == '}'):
-                                                return [True, retorno[1][1:]]
-                                            else:
-                                                return [False, retorno[1], retorno[1][0]['linha'], 'Esperado \'}\'']
-                else:
-                    print_erro(retorno, False)
+        if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '('):
+            retorno = verificar_logica(tokens[2:])
+            if (retorno[0]):
+                if (retorno[1][0]['token'] == 'DEL' and retorno[1][0]['valor'] == ')'):
+                    if (retorno[1][1]['token'] == 'DEL' and retorno[1][1]['valor'] == '{'):
+                        retorno = bloco_expressoes(
+                            retorno[1][2:])
+                        if (retorno[1][0]['valor'] == '}'):
+                            return [True, retorno[1][1:]]
+                        else:
+                            return [False, retorno[1], retorno[1][0]['linha'], 'Esperado \'}\'']
+            else:
+                print_erro(retorno, False)
     else:
         return [False, tokens[0:], tokens[0]['linha'], 'Esperava if']
     return [False, tokens[0:], tokens[0]['linha'], 'Esperado \'}\'']
@@ -239,6 +235,7 @@ def verificar_logica(tokens):
                     return [False, tokens[i], tokens[i]['linha'], 'Expressão inválida)']
             if (tokens[i+1]['token'] == 'REL'):
                 tokens = verificar_relacional(tokens[i:])[1]
+                print("chega log " + str(tokens[i]))
             if (tokens[i+1]['token'] == 'LOG' or tokens[i+1]['valor'] == ')'):
                 if (tokens[i+1]['valor'] == ')'):
                     return [True, tokens[i+1:]]
@@ -332,7 +329,21 @@ def verificar_aritmetica(tokens):
 
 
 # realiza a verificao de uma condicao relacional
+def termo_relacional(tokens):
+    if (tokens[0]['token'] in ['NRO', 'IDE']):
+        if (tokens[1]['token'] == 'REL'):
+            if (tokens[2]['token'] in ['NRO', 'IDE']):
+                return [True, tokens[3:]]
+            else:
+                return [False, tokens, tokens[2]['linha'], 'Esperava NRO ou IDE']
+        else:
+            return [False, tokens, tokens[1]['linha'], 'Esperava ' + str(relacionais)]
+    else:
+        return [False, tokens, tokens[0]['linha'], 'Esperava NRO ou IDE']
+
+
 def verificar_relacional(tokens):
+    print("PRIMERIO: " + str(tokens[0]))
     if (tokens[0]['token'] == 'NRO' or tokens[0]['token'] == 'IDE' or tokens[0]['token'] == 'PRE'):
         if (tokens[0]['token'] == 'PRE'):
             if (tokens[0]['valor'] != 'true' and tokens[0]['valor'] != 'false'):
@@ -347,6 +358,13 @@ def verificar_relacional(tokens):
                 return [False, tokens[2:], tokens[2]['linha'], 'Esperado NRO, IDE, true ou false']
         else:
             return [False, tokens[1:], tokens[1]['linha'], 'Esperando ' + str(relacionais[:-1])]
+    else:
+        if (tokens[0]['valor'] == '('):
+            termo = termo_relacional(tokens[0])
+            if (termo[0]):
+                if (termo[1][0]['valor'] == ')'):
+                    return [True, termo[1][1:]]
+
     return [False, tokens[2:], tokens[2]['linha'], 'Esperado NRO, IDE, true ou false']
 
 
@@ -374,22 +392,25 @@ def verificar_expressao(tokens):
 
 
 def verificar_atribuicoes_struct(tokens):
-    for i in range(len(tokens)):
-        if (tokens[0]['token'] in ['PRE', 'IDE']):
-            # <struct_var> ::= tipo <struct_aux> <struct_var>
-            # <struct_aux> ::= ide <struct2> | <vetor> <struct2> | <matriz> <struct2>
-            # <struct2> ::= ',' <struct_aux> |  ';'
-            if (tokens[0]['token'] == 'PRE'):
-                if (tokens[0]['valor'] in tipos):
-                    if (tokens[1]['token'] == 'IDE'):
-                        for j in range(2, len(tokens)-1):
-                            if (tokens[j]['token'] == 'DEL'):
-                                if (tokens[j]['valor'] == ','):
-                                    if (tokens[j+1]['token'] == 'IDE'):
-                                        continue
-                                if (tokens[j]['valor'] == ';'):
-                                    return [True, tokens[j+1:]]
-
+    if (tokens[0]['token'] in ['PRE', 'IDE']):
+        # <struct_var> ::= tipo <struct_aux> <struct_var>
+        # <struct_aux> ::= ide <struct2> | <vetor> <struct2> | <matriz> <struct2>
+        # <struct2> ::= ',' <struct_aux> |  ';'
+        if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] in tipos):
+            if (tokens[1]['token'] == 'IDE'):
+                if (tokens[2]['valor'] == ';'):
+                    print("chegou no ; inicial")
+                    return [True, tokens[3:]]
+                else:
+                    for j in range(2, len(tokens)-1):
+                        if (tokens[j]['token'] == 'DEL' and tokens[j]['valor'] == ','):
+                            if (tokens[j+1]['token'] == 'IDE'):
+                                continue
+                            else:
+                                return [False, tokens[0:], tokens[0]['linha'], 'Esperava IDE']
+                        if (tokens[j]['valor'] == ';'):
+                            print("chegou no ; final")
+                            return [True, tokens[j+1:]]
 # Automato de verificacao de print()
 
 
@@ -401,11 +422,13 @@ def verificar_print(tokens):
                     if (tokens[4]['valor'] == ';'):
                         return [True, tokens[5:]]
                     else:
-                        return [False, tokens[1:], tokens[1]['linha'], 'esperava \';\'']
+                        return [False, tokens[4:], tokens[4]['linha'], 'Esperava \';\'']
                 else:
-                    return [False, tokens[1:], tokens[1]['linha'], 'esperava \')\'']
+                    return [False, tokens[3:], tokens[3]['linha'], 'Esperava \')\'']
+            else:
+                return [False, tokens[2:], tokens[2]['linha'], 'Esperava cadeia de caracteres']
         else:
-            return [False, tokens[1:], tokens[1]['linha'], 'esperava \'(\'']
+            return [False, tokens[1:], tokens[1]['linha'], 'Esperava \'(\'']
     else:
         return [False, tokens, tokens[0]['linha'], 'Esperava print']
 
@@ -514,62 +537,173 @@ def verificar_procedure(tokens):
 
 
 def bloco_expressoes(tokens):
+    print("BLOCO expressões")
     # print(tokens[0])
     # if
     expressao = verificar_condicional(tokens[0:])
     if (expressao[0]):
         tokens = expressao[1]
+        return [True, tokens]
 
     # while
     expressao = verificar_loop(tokens[0:])
     if (expressao[0]):
         tokens = expressao[1]
+        return [True, tokens]
 
     # struct
     expressao = verificar_struct(tokens[0:])
     if (expressao[0]):
         tokens = expressao[1]
+        return [True, tokens]
 
     # print
 #    print("CHEGA NO PRINT" + str(tokens[0]))
     expressao = verificar_print(tokens[0:])
     if (expressao[0]):
         tokens = expressao[1]
+        return [True, tokens]
 
     # read
     expressao = verificar_read(tokens[0:])
     if (expressao[0]):
         tokens = expressao[1]
+        return [True, tokens]
 
     # function
     expressao = verificar_funcao(tokens[0:])
     if (expressao[0]):
         tokens = expressao[1]
+        return [True, tokens]
 
     # procedure
     expressao = verificar_procedure(tokens[0:])
     if (expressao[0]):
         tokens = expressao[1]
+        return [True, tokens]
+
+    # var
+    expressao = analise_variavel(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+        return [True, tokens]
 
     # atribuicao
+    print(tokens[0])
     if (tokens[0]['token'] == 'IDE'):
         if (tokens[1]['valor'] == '='):
             expressao = verificar_atribuicao(tokens[2:])
             if (expressao[0]):
                 tokens = expressao[1]
-    return expressao
+
+    if (expressao[0]):
+        return expressao
+    else:
+        return [False, expressao[1], expressao[2], expressao[3]]
+
+
+def bloco_if(tokens):
+    retorno = [True, tokens]
+    for i in range(0, len(tokens)):
+        expressao = bloco_expressoes(tokens)
+        if (expressao[0]):
+            tokens = expressao[1]
+            if (tokens[0]['valor'] == '}'):
+                retorno = expressao
+                break
+            continue
+        else:
+            retorno = expressao
+            break
+    return retorno
 
 
 def bloco_start(tokens, coringa):
-    expressao = bloco_expressoes(tokens)
+    retorno = [True, tokens]
+    for i in range(0, len(tokens)):
+        expressao = bloco_expressoes(tokens)
+        if (expressao[0]):
+            tokens = expressao[1]
+            if (tokens[0]['valor'] == coringa):
+                retorno = expressao
+                break
+            continue
+        else:
+            retorno = expressao
+            break
+    return retorno
     if (tokens[0]['valor'] == coringa):
         return [True, expressao[1]]
     else:
-        return bloco_start(expressao[1], coringa)
+        verificacao = bloco_start(expressao[1], coringa)
+        print("VERIFICAÇÃO: " + str(verificacao[1][0]))
+        print("EXPRESSÃO: " + str(expressao[1][0]))
+        if (verificacao[1][0] == expressao[1][0]):
+            return [True, verificacao[1]]
+
+
+def bloco_expressoes_globais(tokens):
+
+    # struct
+    expressao = verificar_struct(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+        return [True, tokens]
+
+    # function
+    expressao = verificar_funcao(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+        return [True, tokens]
+
+    # procedure
+    expressao = verificar_procedure(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+        return [True, tokens]
+
+    # var
+    expressao = analise_variavel(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+        return [True, tokens]
+
+    # const
+    expressao = analise_constante(tokens[0:])
+    if (expressao[0]):
+        tokens = expressao[1]
+        return [True, tokens]
+
+    if (expressao[0]):
+        return expressao
+    else:
+        return [False, expressao[1], expressao[2], expressao[3]]
+
+
+def bloco_global(tokens):
+    retorno = [True, tokens]
+    for i in range(0, len(tokens)):
+        expressao = bloco_expressoes_globais(tokens)
+        if (expressao[0]):
+            tokens = expressao[1]
+            retorno = expressao
+            return retorno
+        else:
+            retorno = expressao
+            break
+    return retorno
 
 
 def sintatico(lista_tokens):
     tokens = varredura_tokens(lista_tokens)
+
+    # GLOBAL
+    expressao = bloco_global(tokens)
+    if (expressao[0]):
+        tokens = expressao[1]
+    else:
+        print_erro(expressao, True)
+
     # START
     if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] in ['start', 'function', 'procedure', 'const', 'var', 'structure']):
         if (tokens[0]['valor'] == 'start'):
@@ -615,11 +749,11 @@ def main():
                 arquivos_filtrados.append(arquivo)
 
     [tokens, erros] = analise(ler_arquivo(arquivo))
+    for arquivo in arquivos_filtrados:
+        escrever_arquivo(arquivo, tokens, erros)
     result = sintatico(tokens)
     if (result[0]):
         print("Código compilado com sucesso!!")
-    for arquivo in arquivos_filtrados:
-        escrever_arquivo(arquivo, tokens, erros)
 
 
 if __name__ == "__main__":
