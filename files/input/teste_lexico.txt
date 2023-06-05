@@ -1,7 +1,9 @@
 var{
 	int a = 3;
 }
-
+// alo
+/* Pessoas 
+lindas  */
 start(){
 var{
 	int a = 3;

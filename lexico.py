@@ -48,7 +48,11 @@ def analisa_caracter(linha, inicial, tokens, erros, contagem_linha):
                 if (len(acumulador) > 1):
                     if (acumulador[1] == "*"):  # É um comentário em bloco
                         # Verifica se o comentário em bloco foi fechado
-                        if (acumulador[len(acumulador)-1] == "/" and acumulador[len(acumulador)-2] == "*"):
+                        if (acumulador[-1] == "/" and acumulador[-2] == "*"):
+                            adicionar_token(
+                                tokens, contagem_linha, "CoM", acumulador)
+                            acumulador = ""
+                        elif (acumulador[len(acumulador)-1] == "/" and acumulador[len(acumulador)-2] == "*"):
                             adicionar_token(
                                 tokens, contagem_linha, "CoM", acumulador)
                             acumulador = ""
