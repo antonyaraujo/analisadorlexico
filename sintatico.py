@@ -4,11 +4,10 @@ Problema 3 - Analisador Sintático
 Discente: Antony Araujo
 '''
 from lexico import *
+from analisador import *
 
 
 def analise_constante(tokens):
-    print("chegou aq")
-    print(tokens[0])
     if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'const'):
         if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '{'):
             retorno = verificar_atribuicao_const(tokens[2:])
@@ -69,8 +68,6 @@ def verificar_atribuicao_const(tokens):
 
 
 def analise_variavel(tokens):
-    print("chegou aq")
-    print(tokens[0])
     if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] == 'var'):
         if (tokens[1]['token'] == 'DEL' and tokens[1]['valor'] == '{'):
             retorno = verificar_atribuicao_var(tokens[2:])
@@ -128,7 +125,6 @@ def verificar_atribuicao_var(tokens):
 
 
 def verificar_atribuicao(tokens):
-    print("CHEGA ATR")
     verificado = verificar_aritmetica(tokens[0:])
     if (verificado[0]):
         tokens = verificado[1]
@@ -144,18 +140,14 @@ def verificar_atribuicao(tokens):
         else:
             return [False, tokens[0:], tokens[0]['linha'], 'Esperava \';\'']
     else:
-        print("correta atribuição")
-        print(tokens[0])
         if (tokens[0]['token'] in ['IDE', 'NRO', 'CAC', 'DEL']):
             if (tokens[1]['valor'] == ';'):
                 return [True, tokens[2:]]
             elif (tokens[0]['valor'] == '['):
-                print("chegou cá")
                 for token in range(1, len(tokens), 2):
                     if (tokens[token]['token'] in ['NRO', 'IDE', 'CAC', 'DEL']):
                         if (tokens[token+1]['valor'] == ']'):
                             if (tokens[token+2]['valor'] == ";"):
-                                print("chega em quei")
                                 return [True, tokens[token+3:]]
                         elif (tokens[token+1]['valor'] == ','):
                             continue
@@ -247,16 +239,12 @@ def verificar_expressao_logica(tokens):
 
 def verificar_logica(tokens):
     for i in range(0, len(tokens), 2):
-        print("i = " + str(i), "valor = " + str(tokens[i]['valor']))
-        print("i+1 = " + str(i+1) + "valor = " + str(tokens[i+1]['valor']))
-        print("i+2 = " + str(i+2) + "valor = " + str(tokens[i+2]['valor']))
         if (tokens[i]['token'] == 'NRO' or tokens[i]['token'] == 'IDE' or tokens[i]['token'] == 'PRE'):
             if (tokens[i]['token'] == 'PRE'):
                 if (tokens[i]['valor'] != 'true' and tokens[i]['valor'] != 'false'):
                     return [False, tokens[i], tokens[i]['linha'], 'Expressão inválida)']
             if (tokens[i+1]['token'] == 'REL'):
                 tokens = verificar_relacional(tokens[i:])[1]
-                print("chega log " + str(tokens[i]))
             if (tokens[i+1]['token'] == 'LOG' or tokens[i+1]['valor'] == ')'):
                 if (tokens[i+1]['valor'] == ')'):
                     return [True, tokens[i+1:]]
@@ -364,7 +352,6 @@ def termo_relacional(tokens):
 
 
 def verificar_relacional(tokens):
-    print("PRIMERIO: " + str(tokens[0]))
     if (tokens[0]['token'] == 'NRO' or tokens[0]['token'] == 'IDE' or tokens[0]['token'] == 'PRE'):
         if (tokens[0]['token'] == 'PRE'):
             if (tokens[0]['valor'] != 'true' and tokens[0]['valor'] != 'false'):
@@ -420,7 +407,6 @@ def verificar_atribuicoes_struct(tokens):
         if (tokens[0]['token'] == 'PRE' and tokens[0]['valor'] in tipos):
             if (tokens[1]['token'] == 'IDE'):
                 if (tokens[2]['valor'] == ';'):
-                    print("chegou no ; inicial")
                     return [True, tokens[3:]]
                 else:
                     for j in range(2, len(tokens)-1):
@@ -430,7 +416,6 @@ def verificar_atribuicoes_struct(tokens):
                             else:
                                 return [False, tokens[0:], tokens[0]['linha'], 'Esperava IDE']
                         if (tokens[j]['valor'] == ';'):
-                            print("chegou no ; final")
                             return [True, tokens[j+1:]]
 # Automato de verificacao de print()
 
@@ -558,8 +543,6 @@ def verificar_procedure(tokens):
 
 
 def bloco_expressoes(tokens):
-    print("BLOCO expressões")
-    # print(tokens[0])
     # if
     expressao = verificar_condicional(tokens[0:])
     if (expressao[0]):
@@ -579,7 +562,6 @@ def bloco_expressoes(tokens):
         return [True, tokens]
 
     # print
-#    print("CHEGA NO PRINT" + str(tokens[0]))
     expressao = verificar_print(tokens[0:])
     if (expressao[0]):
         tokens = expressao[1]
@@ -610,7 +592,6 @@ def bloco_expressoes(tokens):
         return [True, tokens]
 
     # atribuicao
-    print(tokens[0])
     if (tokens[0]['token'] == 'IDE'):
         if (tokens[1]['valor'] == '='):
             expressao = verificar_atribuicao(tokens[2:])
@@ -694,9 +675,6 @@ def bloco_expressoes_globais(tokens):
 
 def bloco_global(tokens):
     retorno = [True, tokens]
-    print("----------------------")
-    print(tokens[0])
-    print("----------------------")
     if (tokens[0]['valor'] not in ['const', 'var', 'procedure', 'function', 'start']):
         return [False, tokens[0:], tokens[0]['linha'], 'Esperava const, var, procedure, function, struct']
 
@@ -728,7 +706,6 @@ def sintatico(lista_tokens):
                 if (tokens[2]['token'] in ['DEL'] and tokens[2]['valor'] in [')']):
                     if (tokens[3]['token'] in ['DEL'] and tokens[3]['valor'] in ['{']):
                         tokens = tokens[4:]
-                        print("VERIFICA ATUAL: " + str(tokens[0]))
                         expressao = bloco_start(tokens, "}")
                         if (expressao[0]):
                             tokens = expressao[1]
