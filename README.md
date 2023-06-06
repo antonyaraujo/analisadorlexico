@@ -18,7 +18,7 @@ Siga as instruções abaixo para executar o compilador:
 
 3. Navegue até o diretório do projeto.
 
-4. Certifique-se de que o arquivo `lexico.py` esteja presente no diretório.
+4. Certifique-se de que o arquivo `lexico.py`, `sintatico.py` e `analisador.py` esteja presente no diretório.
 
 5. No código fonte principal (`analisador.py`), verifique se o caminho dos arquivos de entrada e saída está correto.
 
