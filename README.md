@@ -1,6 +1,6 @@
-# Compilador - README
+# Compilador
 
-Este repositório contém um compilador desenvolvido como parte do projeto da disciplina EXA869 - MI Processadores de Linguagens de Programação. O compilador é responsável pela análise léxica e sintática de um código fonte em uma determinada linguagem de programação.
+Este repositório contém um analisador sintático e léxico, desenvolvidos como parte do projeto da disciplina EXA869 - MI Processadores de Linguagens de Programação. O compilador é responsável pela análise léxica e sintática de um código fonte em uma determinada linguagem de programação.
 
 ## Analisador Sintático
 
@@ -20,12 +20,12 @@ Siga as instruções abaixo para executar o compilador:
 
 4. Certifique-se de que o arquivo `lexico.py` esteja presente no diretório.
 
-5. No código fonte principal (`main.py`), verifique se o caminho dos arquivos de entrada e saída está correto.
+5. No código fonte principal (`analisador.py`), verifique se o caminho dos arquivos de entrada e saída está correto.
 
    - O diretório de entrada padrão é `files/input`, onde devem estar os arquivos de código fonte a serem compilados.
    - O diretório de saída padrão é `files/output`, onde serão gerados os arquivos com os resultados da compilação.
 
-6. Execute o comando `python main.py` para iniciar a compilação.
+6. Execute o comando `python analisador.py` para iniciar a compilação.
 
    - O compilador irá percorrer todos os arquivos presentes no diretório de entrada.
    - Para cada arquivo, será gerado um arquivo de saída com a extensão `-saida.txt` no diretório de saída.

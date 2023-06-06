@@ -1,0 +1,21 @@
+01 PRE start
+01 DEL (
+01 DEL )
+01 DEL {
+02 PRE const
+02 DEL {
+03 PRE int
+03 IDE a
+03 REL =
+03 NRO 10
+03 DEL ;
+04 DEL }
+05 PRE print
+05 DEL (
+05 CAC "Que disciplina, que PBL"
+05 DEL )
+05 DEL ;
+06 DEL }
+
+
+Ocorreu um erro na linha 02. Esperava if, while, struct, print, read, function, procedure, var ou atribuição recebeu: const

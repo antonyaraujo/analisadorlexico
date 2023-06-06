@@ -1,8 +1,10 @@
-/* aloou tereza  */
-start(){	
-var{
-	int a = [0, 0, 0];
+const{	
+	int a, c, d = "92323";
+	int b = [0, 0, 0, 0];
+	real b = 0;
+	string alo = "alo";
 }
+start(){	
 print("alou");
 read(gaston);
 bola = "core";

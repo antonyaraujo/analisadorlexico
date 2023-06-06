@@ -1,0 +1,6 @@
+start(){
+	const{
+		int a = 10;
+	}
+	print("Que disciplina, que PBL");
+}
